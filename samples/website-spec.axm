@@ -1,0 +1,87 @@
+# ===========================
+# E-commerce Platform Spec
+# ===========================
+
+# --- Core Entities ---
+
+ent1 A User is a person who has registered an account with an email and password
+ent2 A Product is an item available for purchase with a name, description, price, and inventory count
+ent3 A Cart is a temporary collection of products associated with a single user
+ent4 An Order is a confirmed purchase created from a cart with a total, status, and timestamp
+ent5 A Review is a rating and comment left by a user on a product they have purchased
+ent6 A Category is a named grouping used to organize products
+ent7 A Seller is a user who has been granted permission to list and manage products
+
+# --- Authentication ---
+
+auth1 A visitor can create an account by providing an email, display name, and password
+auth2 Given {ent1} a user can log in with their email and password
+auth3 A logged-in user receives a session token that expires after 24 hours of inactivity
+auth4 Given {auth3} any request with an expired token must redirect to the login page
+auth5 A user can request a password reset link sent to their registered email
+auth6 Given {auth5} the reset link expires after 1 hour and can only be used once
+auth7 Given {ent7} a seller must complete identity verification before listing products
+
+# --- Product Catalog ---
+
+cat1 Given {ent2} and {ent6} every product must belong to at least one category
+cat2 A product page displays its name, description, price, images, average rating, and reviews
+cat3 Given {cat2} and {ent5} reviews are sorted by most recent by default
+cat4 Products can be searched by name or description using full-text search
+cat5 Given {cat4} search results are ranked by relevance and can be filtered by category and price range
+cat6 Given {ent2} if a product inventory count reaches zero it is shown as out of stock
+cat7 Given {cat6} an out of stock product cannot be added to a cart
+cat8 Given {ent7} a seller can create, edit, and archive their own products but not products from other sellers
+
+# --- Shopping Cart ---
+
+cart1 Given {ent1} and {ent3} a logged-in user has exactly one active cart at any time
+cart2 Given {ent2} and {cart1} a user can add a product to their cart with a specified quantity
+cart3 Given {cart2} and {ent2} the requested quantity cannot exceed the product inventory count
+cart4 Given {cart1} the cart displays each item with its name, unit price, quantity, and line total
+cart5 Given {cart4} the cart displays a subtotal that is the sum of all line totals
+cart6 Given {cart2} a user can update the quantity of an item or remove it from the cart
+cart7 Given {cart1} the cart persists across sessions so a user can return and find their items
+
+# --- Checkout & Orders ---
+
+ord1 Given {cart5} a user can proceed to checkout if their cart has at least one item
+ord2 Given {ord1} checkout requires a shipping address and a payment method
+ord3 Given {ord2} the system validates the payment method before creating the order
+ord4 Given {ord3} and {ent4} a successful payment creates an order with status pending
+ord5 Given {ord4} and {ent2} creating an order decrements the inventory count of each purchased product
+ord6 Given {ord4} the user receives an order confirmation email with a summary and order number
+ord7 Given {ent4} an order progresses through statuses pending then shipped then delivered
+ord8 Given {ord7} the user can view the current status and estimated delivery date on the order page
+ord9 Given {ord7} a user can cancel an order only while its status is pending
+
+# --- Reviews ---
+
+rev1 Given {ent1} and {ent5} and {ent4} a user can only review a product they have purchased
+rev2 Given {rev1} a review includes a rating from 1 to 5 and an optional text comment
+rev3 Given {rev1} a user can submit at most one review per product
+rev4 Given {rev3} a user can edit or delete their own review at any time
+rev5 Given {ent5} and {cat2} the average rating displayed on the product page updates when reviews change
+
+# --- Seller Dashboard ---
+
+sell1 Given {ent7} a seller can view a dashboard showing all their listed products and sales
+sell2 Given {sell1} and {ent4} the dashboard shows total revenue and number of orders per product
+sell3 Given {sell1} a seller can see which products are low in stock defined as inventory below 10
+sell4 Given {sell3} the system sends an email alert to the seller when a product inventory drops below 5
+
+# --- Access Control ---
+
+ac1 Given {ent1} an unauthenticated visitor can browse products and categories but cannot add to cart
+ac2 Given {auth2} and {cart2} only an authenticated user can add items to a cart or place an order
+ac3 Given {ent7} and {cat8} a seller can only manage their own products
+ac4 An admin can suspend any user account or remove any product or review
+ac5 Given {ac4} suspended users cannot log in and see a message explaining their suspension
+
+# --- Performance & Reliability ---
+
+perf1 Given {cat4} search results must return within 200 milliseconds for up to 100000 products
+perf2 Given {ord3} payment processing must complete or timeout within 10 seconds
+perf3 Given {perf2} if payment times out the order is not created and the user is shown an error
+perf4 Given {cart7} cart data must be durable across server restarts using persistent storage
+perf5 The system must support 1000 concurrent authenticated users without degradation

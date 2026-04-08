@@ -1,0 +1,17 @@
+{
+  "grammars": [
+    {
+      "name": "axiomate",
+      "camelCase": false,
+      "scope": "source.axm",
+      "path": ".",
+      "file-types": ["axm"],
+      "highlights": "queries/highlights.scm"
+    }
+  ],
+  "metadata": {
+    "version": "0.1.0",
+    "links": {},
+    "repository": ""
+  }
+}
