@@ -59,7 +59,9 @@ connection.onHover((params) => {
 connection.onCompletion((params) => {
   const parsed = parsedDocuments.get(params.textDocument.uri);
   if (!parsed) return [];
-  return onCompletion(params, parsed);
+  const doc = documents.get(params.textDocument.uri);
+  if (!doc) return [];
+  return onCompletion(params, parsed, doc);
 });
 
 connection.onReferences((params) => {

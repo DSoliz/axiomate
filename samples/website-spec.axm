@@ -16,17 +16,17 @@ ent7 A Seller is a user who has been granted permission to list and manage produ
 
 auth1 A visitor can create an account by providing an email, display name, and password
 auth2 Given {ent1} a user can log in with their email and password
-auth3 A logged-in user receives a session token that expires after 24 hours of inactivity
+auth3@asm A logged-in user receives a session token that expires after 24 hours of inactivity
 auth4 Given {auth3} any request with an expired token must redirect to the login page
 auth5 A user can request a password reset link sent to their registered email
-auth6 Given {auth5} the reset link expires after 1 hour and can only be used once
+auth6@asm Given {auth5} the reset link expires after 1 hour and can only be used once
 auth7 Given {ent7} a seller must complete identity verification before listing products
 
 # --- Product Catalog ---
 
 cat1 Given {ent2} and {ent6} every product must belong to at least one category
 cat2 A product page displays its name, description, price, images, average rating, and reviews
-cat3 Given {cat2} and {ent5} reviews are sorted by most recent by default
+cat3@asm Given {cat2} and {ent5} reviews are sorted by most recent by default
 cat4 Products can be searched by name or description using full-text search
 cat5 Given {cat4} search results are ranked by relevance and can be filtered by category and price range
 cat6 Given {ent2} if a product inventory count reaches zero it is shown as out of stock
@@ -41,7 +41,7 @@ cart3 Given {cart2} and {ent2} the requested quantity cannot exceed the product 
 cart4 Given {cart1} the cart displays each item with its name, unit price, quantity, and line total
 cart5 Given {cart4} the cart displays a subtotal that is the sum of all line totals
 cart6 Given {cart2} a user can update the quantity of an item or remove it from the cart
-cart7 Given {cart1} the cart persists across sessions so a user can return and find their items
+cart7@asm Given {cart1} the cart persists across sessions so a user can return and find their items
 
 # --- Checkout & Orders ---
 
@@ -53,7 +53,9 @@ ord5 Given {ord4} and {ent2} creating an order decrements the inventory count of
 ord6 Given {ord4} the user receives an order confirmation email with a summary and order number
 ord7 Given {ent4} an order progresses through statuses pending then shipped then delivered
 ord8 Given {ord7} the user can view the current status and estimated delivery date on the order page
-ord9 Given {ord7} a user can cancel an order only while its status is pending
+ord9@rsk Given {ord7} a user can cancel an order only while its status is pending
+ord10@unk Given {ord9} it is unclear whether cancellation should trigger an immediate refund or a refund request
+ord11@unk Given {ord5} the behavior when two users checkout the last item simultaneously is undefined
 
 # --- Reviews ---
 
@@ -62,6 +64,8 @@ rev2 Given {rev1} a review includes a rating from 1 to 5 and an optional text co
 rev3 Given {rev1} a user can submit at most one review per product
 rev4 Given {rev3} a user can edit or delete their own review at any time
 rev5 Given {ent5} and {cat2} the average rating displayed on the product page updates when reviews change
+rev6@rsk Given {rev4} allowing review deletion could enable sellers to pressure users into removing negative reviews
+rev7@unk Given {rev2} it is undecided whether reviews should support image attachments
 
 # --- Seller Dashboard ---
 
@@ -69,6 +73,7 @@ sell1 Given {ent7} a seller can view a dashboard showing all their listed produc
 sell2 Given {sell1} and {ent4} the dashboard shows total revenue and number of orders per product
 sell3 Given {sell1} a seller can see which products are low in stock defined as inventory below 10
 sell4 Given {sell3} the system sends an email alert to the seller when a product inventory drops below 5
+sell5@asm Given {sell3} the low stock threshold of 10 is suitable for all product types
 
 # --- Access Control ---
 
@@ -77,11 +82,13 @@ ac2 Given {auth2} and {cart2} only an authenticated user can add items to a cart
 ac3 Given {ent7} and {cat8} a seller can only manage their own products
 ac4 An admin can suspend any user account or remove any product or review
 ac5 Given {ac4} suspended users cannot log in and see a message explaining their suspension
+ac6@rsk Given {ac4} there is no audit trail for admin actions which could lead to abuse
 
 # --- Performance & Reliability ---
 
-perf1 Given {cat4} search results must return within 200 milliseconds for up to 100000 products
-perf2 Given {ord3} payment processing must complete or timeout within 10 seconds
+perf1@asm Given {cat4} search results must return within 200 milliseconds for up to 100000 products
+perf2@asm Given {ord3} payment processing must complete or timeout within 10 seconds
 perf3 Given {perf2} if payment times out the order is not created and the user is shown an error
 perf4 Given {cart7} cart data must be durable across server restarts using persistent storage
-perf5 The system must support 1000 concurrent authenticated users without degradation
+perf5@asm The system must support 1000 concurrent authenticated users without degradation
+perf6@unk Given {perf5} it is unknown whether 1000 concurrent users is a realistic peak load estimate

@@ -108,4 +108,58 @@ describe('parse', () => {
     expect(doc.statements).toHaveLength(1);
     expect(doc.statements[0].id).toBe('ax1');
   });
+
+  it('parses statement without annotation', () => {
+    const doc = parse('ax1 Plain statement\n');
+    expect(doc.statements[0].annotation).toBeNull();
+    expect(doc.statements[0].annotationRange).toBeNull();
+  });
+
+  it('parses @asm annotation', () => {
+    const doc = parse('ax1@asm This is an assumption\n');
+    const stmt = doc.statements[0];
+    expect(stmt.id).toBe('ax1');
+    expect(stmt.annotation).toBe('asm');
+    expect(stmt.body).toBe('This is an assumption');
+  });
+
+  it('parses @rsk annotation', () => {
+    const doc = parse('th1@rsk Risky conclusion\n');
+    expect(doc.statements[0].annotation).toBe('rsk');
+  });
+
+  it('parses @unk annotation', () => {
+    const doc = parse('open1@unk Unknown thing\n');
+    expect(doc.statements[0].annotation).toBe('unk');
+  });
+
+  it('stores raw annotation even if invalid', () => {
+    const doc = parse('ax1@foo Invalid annotation\n');
+    expect(doc.statements[0].annotation).toBe('foo');
+  });
+
+  it('computes correct annotationRange', () => {
+    const doc = parse('ax1@asm Body\n');
+    const stmt = doc.statements[0];
+    // @asm starts at character 3, ends at 7
+    expect(stmt.annotationRange).toEqual({
+      start: { line: 0, character: 3 },
+      end: { line: 0, character: 7 },
+    });
+  });
+
+  it('computes correct bodyRange with annotation', () => {
+    const doc = parse('ax1@asm Body text\n');
+    const stmt = doc.statements[0];
+    // ax1@asm = 7 chars, then space, body starts at 8
+    expect(stmt.bodyRange.start).toEqual({ line: 0, character: 8 });
+  });
+
+  it('computes correct reference ranges with annotation', () => {
+    const doc = parse('th1@rsk Given {ax1} done\n');
+    const ref = doc.statements[0].references[0];
+    // th1@rsk = 7, space = 1, "Given " = 6 => {ax1} at 14
+    expect(ref.range.start).toEqual({ line: 0, character: 14 });
+    expect(ref.range.end).toEqual({ line: 0, character: 19 });
+  });
 });

@@ -14,9 +14,15 @@ export interface Reference {
   idRange: Range;
 }
 
+export type Annotation = 'unk' | 'rsk' | 'asm';
+
+export const VALID_ANNOTATIONS: readonly string[] = ['unk', 'rsk', 'asm'];
+
 export interface Statement {
   id: string;
   idRange: Range;
+  annotation: Annotation | null;
+  annotationRange: Range | null;
   bodyRange: Range;
   fullRange: Range;
   body: string;

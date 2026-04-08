@@ -1,6 +1,5 @@
 (comment) @comment
 
-(statement
-  (identifier) @label)
+(statement_head) @label
 
 (reference) @variable

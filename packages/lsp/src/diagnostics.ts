@@ -1,5 +1,5 @@
 import { Diagnostic, DiagnosticSeverity } from 'vscode-languageserver/node';
-import { ParsedDocument } from '@axiomate/parser';
+import { ParsedDocument, VALID_ANNOTATIONS } from '@axiomate/parser';
 
 export function computeDiagnostics(doc: ParsedDocument): Diagnostic[] {
   const diagnostics: Diagnostic[] = [];
@@ -15,6 +15,18 @@ export function computeDiagnostics(doc: ParsedDocument): Diagnostic[] {
           source: 'axiomate',
         });
       }
+    }
+  }
+
+  // Invalid annotations
+  for (const stmt of doc.statements) {
+    if (stmt.annotation && !VALID_ANNOTATIONS.includes(stmt.annotation)) {
+      diagnostics.push({
+        range: stmt.annotationRange!,
+        severity: DiagnosticSeverity.Error,
+        message: `Invalid annotation '@${stmt.annotation}'. Valid annotations: @unk, @rsk, @asm`,
+        source: 'axiomate',
+      });
     }
   }
 

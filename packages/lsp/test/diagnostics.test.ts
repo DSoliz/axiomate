@@ -46,4 +46,23 @@ describe('computeDiagnostics', () => {
     expect(dupes).toHaveLength(2);
     expect(unresolved).toHaveLength(1);
   });
+
+  it('reports invalid annotation', () => {
+    const doc = parse('ax1@foo Invalid annotation\n');
+    const diags = computeDiagnostics(doc);
+    expect(diags).toHaveLength(1);
+    expect(diags[0].message).toContain("Invalid annotation '@foo'");
+  });
+
+  it('accepts valid annotations without diagnostics', () => {
+    const doc = parse('ax1@asm Assumption\nax2@rsk Risk\nax3@unk Unknown\n');
+    const diags = computeDiagnostics(doc);
+    expect(diags).toHaveLength(0);
+  });
+
+  it('no diagnostic for statement without annotation', () => {
+    const doc = parse('ax1 Plain\n');
+    const diags = computeDiagnostics(doc);
+    expect(diags).toHaveLength(0);
+  });
 });

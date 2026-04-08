@@ -1,18 +1,36 @@
 import { CompletionParams, CompletionItem, CompletionItemKind, TextEdit, Range } from 'vscode-languageserver/node';
+import { TextDocument } from 'vscode-languageserver-textdocument';
 import { ParsedDocument } from '@axiomate/parser';
 
-export function onCompletion(params: CompletionParams, doc: ParsedDocument): CompletionItem[] {
+export function onCompletion(params: CompletionParams, doc: ParsedDocument, textDoc: TextDocument): CompletionItem[] {
   const cursorLine = params.position.line;
   const cursorChar = params.position.character;
+
+  // Only complete inside a `{` context
+  const lineText = textDoc.getText({
+    start: { line: cursorLine, character: 0 },
+    end: { line: cursorLine, character: cursorChar },
+  });
+
+  const braceIdx = lineText.lastIndexOf('{');
+  if (braceIdx === -1) return [];
+
+  // Make sure there's no closing `}` between the `{` and cursor
+  const afterBrace = lineText.slice(braceIdx);
+  if (afterBrace.includes('}')) return [];
+
   const currentStmt = doc.statements.find((s) => s.line === cursorLine);
 
-  // Find the opening `{` before the cursor to build the replace range
-  let braceChar = cursorChar - 1;
-  // The trigger character is `{`, so brace should be right before or nearby
-  // We'll replace from `{` to cursor with the full `{id}`
+  // Check if there's a `}` right after the cursor (from auto-close) to include in the replace range
+  const fullLine = textDoc.getText({
+    start: { line: cursorLine, character: 0 },
+    end: { line: cursorLine + 1, character: 0 },
+  });
+  const hasClosingBrace = fullLine[cursorChar] === '}';
+
   const replaceRange: Range = {
-    start: { line: cursorLine, character: Math.max(0, braceChar) },
-    end: { line: cursorLine, character: cursorChar },
+    start: { line: cursorLine, character: braceIdx },
+    end: { line: cursorLine, character: cursorChar + (hasClosingBrace ? 1 : 0) },
   };
 
   return doc.statements
@@ -20,7 +38,7 @@ export function onCompletion(params: CompletionParams, doc: ParsedDocument): Com
     .map((s) => ({
       label: s.id,
       kind: CompletionItemKind.Reference,
-      detail: s.body.length > 80 ? s.body.slice(0, 80) + '...' : s.body,
+      detail: (s.annotation ? `[@${s.annotation}] ` : '') + (s.body.length > 80 ? s.body.slice(0, 80) + '...' : s.body),
       textEdit: TextEdit.replace(replaceRange, `{${s.id}}`),
     }));
 }

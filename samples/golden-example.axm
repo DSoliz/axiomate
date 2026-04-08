@@ -1,0 +1,7 @@
+stm auth1 = database is postgress
+unk auth2 = is postgress safe?
+rsk auth3 = we don't have experience with postgress
+asm auth4 = postgress is enough for this project
+stm auth5 = we want to use language x
+stm auth6 = postgress doesn't integrate well with language x
+stm auth7 = from ${auth5} and ${auth6} we should not use language x

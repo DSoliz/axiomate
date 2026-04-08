@@ -12,7 +12,7 @@ export function onHover(params: HoverParams, doc: ParsedDocument): Hover | null 
   return {
     contents: {
       kind: 'markdown',
-      value: `**${target[0].id}** ${target[0].body}`,
+      value: `**${target[0].id}**${target[0].annotation ? ` \`@${target[0].annotation}\`` : ''} ${target[0].body}`,
     },
     range: found.reference.range,
   };

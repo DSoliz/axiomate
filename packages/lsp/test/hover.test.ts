@@ -31,4 +31,23 @@ describe('onHover', () => {
     const result = onHover(makeParams(0, 12), doc);
     expect(result).toBeNull();
   });
+
+  it('shows annotation in hover content', () => {
+    const doc = parse('ax1@asm We assume this\nth1 Given {ax1} done\n');
+    const result = onHover(makeParams(1, 12), doc);
+    expect(result).not.toBeNull();
+    expect(result!.contents).toEqual({
+      kind: 'markdown',
+      value: '**ax1** `@asm` We assume this',
+    });
+  });
+
+  it('shows no annotation tag when none present', () => {
+    const doc = parse('ax1 Plain\nth1 Given {ax1} done\n');
+    const result = onHover(makeParams(1, 12), doc);
+    expect(result!.contents).toEqual({
+      kind: 'markdown',
+      value: '**ax1** Plain',
+    });
+  });
 });

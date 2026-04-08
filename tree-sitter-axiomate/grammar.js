@@ -6,13 +6,25 @@ module.exports = grammar({
   extras: ($) => [],
 
   rules: {
-    source_file: ($) => repeat(choice($.statement, $.comment, /\n/)),
+    source_file: ($) => repeat(choice($.statement, $.comment, $.error_line, /\n/)),
 
     comment: ($) => token(seq(/[ \t]*#/, /[^\n]*/)),
 
-    statement: ($) => seq($.identifier, token.immediate(/ /), $.body, /\n?/),
+    // A line that doesn't match statement or comment — consumed to prevent
+    // expensive error recovery on partial edits
+    error_line: ($) => token(prec(-1, seq(/[^\n#]/, /[^\n]*/))),
 
-    identifier: ($) => /[a-zA-Z0-9][a-zA-Z0-9_-]*/,
+    statement: ($) =>
+      seq(
+        $.statement_head,
+        $.body,
+        /\n?/,
+      ),
+
+    // Tokenize "id[@annotation] " as a single atomic token to avoid
+    // ambiguity with text during error recovery
+    statement_head: ($) =>
+      token(prec(1, seq(/[a-zA-Z0-9][a-zA-Z0-9_-]*/, optional(seq("@", /[a-zA-Z]+/)), / /))),
 
     body: ($) => repeat1(choice($.reference, $.text)),
 
