@@ -1,0 +1,56 @@
+{
+  "name": "@axiomate/lsp",
+  "displayName": "Axiomate",
+  "description": "Language support for .axm files",
+  "version": "0.1.0",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "activationEvents": [
+    "onLanguage:axiomate"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "languages": [
+      {
+        "id": "axiomate",
+        "aliases": [
+          "Axiomate"
+        ],
+        "extensions": [
+          ".axm"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "axiomate",
+        "scopeName": "source.axm",
+        "path": "./syntaxes/axm.tmLanguage.json"
+      }
+    ]
+  },
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "test": "vitest run",
+    "package": "vsce package --no-dependencies"
+  },
+  "dependencies": {
+    "@axiomate/parser": "workspace:*",
+    "vscode-languageclient": "^9.0.1",
+    "vscode-languageserver": "^9.0.1",
+    "vscode-languageserver-textdocument": "^1.0.11"
+  },
+  "devDependencies": {
+    "@types/node": "^25.5.2",
+    "@types/vscode": "^1.85.0",
+    "@vscode/vsce": "^2.26.0",
+    "typescript": "^5.4.0",
+    "vitest": "^1.6.0"
+  }
+}

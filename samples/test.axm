@@ -1,0 +1,18 @@
+# Foundations
+ax1 A thing either exists or it does not
+ax2 If something exists then it has at least one property
+ax3 Two things are identical if and only if they share all properties
+
+# Inference
+th1 Given {ax2} and {ax3} two things with different properties are not identical
+th2 Given {ax1} a thing that does not exist has no properties
+th3 Given {th2} and {ax3} nonexistence is unique
+
+# Application
+def1 Let "zero" be the concept of nothing
+th4 Given {def1} and {ax1} zero exists as a concept
+th5 Given {th4} and {ax2} zero has at least one property
+th6 Given {th1} and {th5} zero is distinguishable from any other concept
+
+# This reference is broken on purpose — the LSP should flag it
+err1 Given {ax99} this should show an error

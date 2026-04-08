@@ -1,0 +1,8 @@
+{
+  "files": [],
+  "references": [
+    { "path": "packages/parser" },
+    { "path": "packages/lsp" },
+    { "path": "packages/renderer" }
+  ]
+}
