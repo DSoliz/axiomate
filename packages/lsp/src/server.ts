@@ -12,6 +12,7 @@ import { onDefinition } from './definition';
 import { onHover } from './hover';
 import { onCompletion } from './completion';
 import { onCodeAction } from './codeAction';
+import { onReferences } from './references';
 
 const connection = createConnection(ProposedFeatures.all);
 const documents = new TextDocuments(TextDocument);
@@ -24,6 +25,7 @@ connection.onInitialize((): InitializeResult => ({
     hoverProvider: true,
     definitionProvider: true,
     codeActionProvider: true,
+    referencesProvider: true,
   },
 }));
 
@@ -59,6 +61,12 @@ connection.onCompletion((params) => {
   const parsed = parsedDocuments.get(params.textDocument.uri);
   if (!parsed) return [];
   return onCompletion(params, parsed);
+});
+
+connection.onReferences((params) => {
+  const parsed = parsedDocuments.get(params.textDocument.uri);
+  if (!parsed) return [];
+  return onReferences(params, parsed);
 });
 
 connection.onCodeAction((params) => {
