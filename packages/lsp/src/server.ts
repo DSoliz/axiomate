@@ -1,7 +1,6 @@
 import {
   createConnection,
   TextDocuments,
-  ProposedFeatures,
   TextDocumentSyncKind,
   InitializeResult,
 } from 'vscode-languageserver/node';
@@ -14,7 +13,7 @@ import { onCompletion } from './completion';
 import { onCodeAction } from './codeAction';
 import { onReferences } from './references';
 
-const connection = createConnection(ProposedFeatures.all);
+const connection = createConnection();
 const documents = new TextDocuments(TextDocument);
 const parsedDocuments = new Map<string, ParsedDocument>();
 

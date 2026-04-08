@@ -10,15 +10,13 @@ module.exports = grammar({
 
     comment: ($) => token(seq(/[ \t]*#/, /[^\n]*/)),
 
-    statement: ($) => seq($.identifier, / /, $.body, /\n?/),
+    statement: ($) => seq($.identifier, token.immediate(/ /), $.body, /\n?/),
 
     identifier: ($) => /[a-zA-Z0-9][a-zA-Z0-9_-]*/,
 
     body: ($) => repeat1(choice($.reference, $.text)),
 
-    reference: ($) => seq("{", $.reference_id, "}"),
-
-    reference_id: ($) => /[a-zA-Z0-9_-]+/,
+    reference: ($) => seq("{", token.immediate(/[a-zA-Z0-9_-]+/), token.immediate("}")),
 
     text: ($) => /[^\{\n]+/,
   },
