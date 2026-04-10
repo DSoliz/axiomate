@@ -12,14 +12,14 @@ function makeParams(uri = 'file:///test.axm') {
 
 describe('onCodeAction', () => {
   it('generates next ID based on existing statements', () => {
-    const doc = parse('ax1 First\nax2 Second\n');
+    const doc = parse('stm ax1 = First\nstm ax2 = Second\n');
     const actions = onCodeAction(makeParams(), doc);
     expect(actions).toHaveLength(1);
     expect(actions[0].title).toContain('ax3');
   });
 
   it('inserts after the last statement', () => {
-    const doc = parse('ax1 First\nax2 Second\n');
+    const doc = parse('stm ax1 = First\nstm ax2 = Second\n');
     const actions = onCodeAction(makeParams(), doc);
     const edit = actions[0].edit!.changes!['file:///test.axm'][0];
     expect(edit.range.start.line).toBe(2);
@@ -30,5 +30,12 @@ describe('onCodeAction', () => {
     const actions = onCodeAction(makeParams(), doc);
     expect(actions).toHaveLength(1);
     expect(actions[0].title).toContain('ax1');
+  });
+
+  it('generates statement with stm prefix and = separator', () => {
+    const doc = parse('stm ax1 = First\n');
+    const actions = onCodeAction(makeParams(), doc);
+    const edit = actions[0].edit!.changes!['file:///test.axm'][0];
+    expect(edit.newText).toBe('stm ax2 = \n');
   });
 });

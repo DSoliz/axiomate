@@ -11,43 +11,54 @@ function makeParams(line: number, character: number, uri = 'file:///test.axm') {
 
 describe('onHover', () => {
   it('returns hover content for a reference', () => {
-    const doc = parse('ax1 All humans are mortal\nth1 Given {ax1} done\n');
-    const result = onHover(makeParams(1, 12), doc);
+    const doc = parse('stm ax1 = All humans are mortal\nstm th1 = Given ${ax1} done\n');
+    const result = onHover(makeParams(1, 19), doc);
     expect(result).not.toBeNull();
-    expect(result!.contents).toEqual({
-      kind: 'markdown',
-      value: '**ax1** All humans are mortal',
-    });
+    const value = (result!.contents as { value: string }).value;
+    expect(value).toContain('**ax1**');
+    expect(value).toContain('`stm`');
+    expect(value).toContain('*Statement*');
+    expect(value).toContain('All humans are mortal');
+    expect(value).toContain('A plain assertion or fact.');
   });
 
   it('returns null when not on a reference', () => {
-    const doc = parse('ax1 First\nth1 Given {ax1} done\n');
-    const result = onHover(makeParams(0, 2), doc);
+    const doc = parse('stm ax1 = First\nstm th1 = Given ${ax1} done\n');
+    const result = onHover(makeParams(0, 6), doc);
     expect(result).toBeNull();
   });
 
   it('returns null for unresolved reference', () => {
-    const doc = parse('th1 Given {missing} done\n');
-    const result = onHover(makeParams(0, 12), doc);
+    const doc = parse('stm th1 = Given ${missing} done\n');
+    const result = onHover(makeParams(0, 19), doc);
     expect(result).toBeNull();
   });
 
-  it('shows annotation in hover content', () => {
-    const doc = parse('ax1@asm We assume this\nth1 Given {ax1} done\n');
-    const result = onHover(makeParams(1, 12), doc);
+  it('shows asm type with description in hover', () => {
+    const doc = parse('asm ax1 = We assume this\nstm th1 = Given ${ax1} done\n');
+    const result = onHover(makeParams(1, 19), doc);
     expect(result).not.toBeNull();
-    expect(result!.contents).toEqual({
-      kind: 'markdown',
-      value: '**ax1** `@asm` We assume this',
-    });
+    const value = (result!.contents as { value: string }).value;
+    expect(value).toContain('`asm`');
+    expect(value).toContain('*Assumption*');
+    expect(value).toContain('A statement accepted without proof.');
   });
 
-  it('shows no annotation tag when none present', () => {
-    const doc = parse('ax1 Plain\nth1 Given {ax1} done\n');
-    const result = onHover(makeParams(1, 12), doc);
-    expect(result!.contents).toEqual({
-      kind: 'markdown',
-      value: '**ax1** Plain',
-    });
+  it('shows rsk type with description in hover', () => {
+    const doc = parse('rsk r1 = Risky thing\nstm th1 = Given ${r1} done\n');
+    const result = onHover(makeParams(1, 19), doc);
+    const value = (result!.contents as { value: string }).value;
+    expect(value).toContain('`rsk`');
+    expect(value).toContain('*Risk*');
+    expect(value).toContain('A statement whose validity carries risk.');
+  });
+
+  it('shows unk type with description in hover', () => {
+    const doc = parse('unk q1 = Open question\nstm th1 = Given ${q1} done\n');
+    const result = onHover(makeParams(1, 19), doc);
+    const value = (result!.contents as { value: string }).value;
+    expect(value).toContain('`unk`');
+    expect(value).toContain('*Unknown*');
+    expect(value).toContain('A statement whose truth value is not yet known.');
   });
 });

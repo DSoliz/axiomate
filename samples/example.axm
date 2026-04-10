@@ -1,9 +1,9 @@
 # Peano axioms (informal)
-pa1 Zero is a natural number
-pa2 Every natural number has a successor which is also a natural number
-pa3 Zero is not the successor of any natural number
-pa4 If the successors of two numbers are equal then the two numbers are equal
-pa5 If a property holds for zero and for the successor of every number for which it holds then it holds for all natural numbers
+stm pa1 = Zero is a natural number
+stm pa2 = Every natural number has a successor which is also a natural number
+stm pa3 = Zero is not the successor of any natural number
+stm pa4 = If the successors of two numbers are equal then the two numbers are equal
+stm pa5 = If a property holds for zero and for the successor of every number for which it holds then it holds for all natural numbers
 
 # A derived statement
-th1 Given {pa1} and {pa2} we can construct the sequence 0, S(0), S(S(0)), ...
+stm th1 = Given ${pa1} and ${pa2} we can construct the sequence 0, S(0), S(S(0)), ...

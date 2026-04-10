@@ -14,15 +14,29 @@ export interface Reference {
   idRange: Range;
 }
 
-export type Annotation = 'unk' | 'rsk' | 'asm';
+export type Annotation = 'stm' | 'unk' | 'rsk' | 'asm';
 
-export const VALID_ANNOTATIONS: readonly string[] = ['unk', 'rsk', 'asm'];
+export const VALID_ANNOTATIONS: readonly string[] = ['stm', 'unk', 'rsk', 'asm'];
+
+export const TYPE_LABELS: Record<string, string> = {
+  stm: 'Statement',
+  unk: 'Unknown',
+  rsk: 'Risk',
+  asm: 'Assumption',
+};
+
+export const TYPE_DESCRIPTIONS: Record<string, string> = {
+  stm: 'A plain assertion or fact.',
+  unk: 'A statement whose truth value is not yet known.',
+  rsk: 'A statement whose validity carries risk.',
+  asm: 'A statement accepted without proof.',
+};
 
 export interface Statement {
   id: string;
   idRange: Range;
-  annotation: Annotation | null;
-  annotationRange: Range | null;
+  annotation: string;
+  annotationRange: Range;
   bodyRange: Range;
   fullRange: Range;
   body: string;

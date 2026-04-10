@@ -31,16 +31,17 @@ describe('positionInRange', () => {
 
 describe('findReferenceAtPosition', () => {
   it('finds reference when cursor is on it', () => {
-    const doc = parse('ax1 First\nth1 Given {ax1} done\n');
-    // {ax1} is at characters 10-15 on line 1
-    const result = findReferenceAtPosition(doc, { line: 1, character: 12 });
+    // "stm ax1 = First"              line 0
+    // "stm th1 = Given ${ax1} done"  line 1, ref at 16-22
+    const doc = parse('stm ax1 = First\nstm th1 = Given ${ax1} done\n');
+    const result = findReferenceAtPosition(doc, { line: 1, character: 19 });
     expect(result).not.toBeNull();
     expect(result!.reference.id).toBe('ax1');
   });
 
   it('returns null when cursor is not on a reference', () => {
-    const doc = parse('ax1 First\nth1 Given {ax1} done\n');
-    const result = findReferenceAtPosition(doc, { line: 1, character: 5 });
+    const doc = parse('stm ax1 = First\nstm th1 = Given ${ax1} done\n');
+    const result = findReferenceAtPosition(doc, { line: 1, character: 12 });
     expect(result).toBeNull();
   });
 
@@ -53,12 +54,12 @@ describe('findReferenceAtPosition', () => {
 
 describe('generateNextId', () => {
   it('increments the most common prefix', () => {
-    const doc = parse('ax1 A\nax2 B\nax3 C\n');
+    const doc = parse('stm ax1 = A\nstm ax2 = B\nstm ax3 = C\n');
     expect(generateNextId(doc)).toBe('ax4');
   });
 
   it('handles mixed prefixes', () => {
-    const doc = parse('ax1 A\nax2 B\nth1 C\n');
+    const doc = parse('stm ax1 = A\nstm ax2 = B\nstm th1 = C\n');
     const next = generateNextId(doc);
     // ax is most common (2 vs 1), highest number overall is 2
     expect(next).toBe('ax3');
@@ -70,7 +71,7 @@ describe('generateNextId', () => {
   });
 
   it('handles single statement', () => {
-    const doc = parse('def1 Something\n');
+    const doc = parse('stm def1 = Something\n');
     expect(generateNextId(doc)).toBe('def2');
   });
 });

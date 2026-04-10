@@ -20,7 +20,7 @@ const parsedDocuments = new Map<string, ParsedDocument>();
 connection.onInitialize((): InitializeResult => ({
   capabilities: {
     textDocumentSync: TextDocumentSyncKind.Full,
-    completionProvider: { triggerCharacters: ['{'] },
+    completionProvider: { triggerCharacters: ['$'] },
     hoverProvider: true,
     definitionProvider: true,
     codeActionProvider: true,

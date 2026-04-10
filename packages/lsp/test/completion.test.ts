@@ -11,8 +11,8 @@ function setup(text: string, line: number, character: number, uri = 'file:///tes
 }
 
 describe('onCompletion', () => {
-  it('returns all statement IDs except the current one after {', () => {
-    const { doc, textDoc, params } = setup('ax1 First\nax2 Second\nth1 Given {\n', 2, 11);
+  it('returns all statement IDs except the current one after ${', () => {
+    const { doc, textDoc, params } = setup('stm ax1 = First\nstm ax2 = Second\nstm th1 = Given ${\n', 2, 18);
     const result = onCompletion(params, doc, textDoc);
     const labels = result.map((c) => c.label);
     expect(labels).toContain('ax1');
@@ -20,50 +20,58 @@ describe('onCompletion', () => {
     expect(labels).not.toContain('th1');
   });
 
-  it('includes body text as detail', () => {
-    const { doc, textDoc, params } = setup('ax1 All humans are mortal\nth1 Given {\n', 1, 11);
+  it('includes body text and type label as detail', () => {
+    const { doc, textDoc, params } = setup('stm ax1 = All humans are mortal\nstm th1 = Given ${\n', 1, 18);
     const result = onCompletion(params, doc, textDoc);
     const ax1 = result.find((c) => c.label === 'ax1');
-    expect(ax1?.detail).toBe('All humans are mortal');
+    expect(ax1?.detail).toBe('[Statement] All humans are mortal');
   });
 
   it('truncates long body text', () => {
     const longBody = 'A'.repeat(100);
-    const { doc, textDoc, params } = setup(`ax1 ${longBody}\nth1 Given {\n`, 1, 11);
+    const { doc, textDoc, params } = setup(`stm ax1 = ${longBody}\nstm th1 = Given \${\n`, 1, 18);
     const result = onCompletion(params, doc, textDoc);
     const ax1 = result.find((c) => c.label === 'ax1');
-    expect(ax1?.detail).toHaveLength(83); // 80 chars + "..."
+    expect(ax1?.detail).toContain('[Statement] ');
+    expect(ax1?.detail).toContain('...');
   });
 
-  it('returns empty when no { before cursor', () => {
-    const { doc, textDoc, params } = setup('ax1 First\nax2 Second\n', 1, 5);
+  it('returns empty when no ${ before cursor', () => {
+    const { doc, textDoc, params } = setup('stm ax1 = First\nstm ax2 = Second\n', 1, 12);
     const result = onCompletion(params, doc, textDoc);
     expect(result).toHaveLength(0);
   });
 
   it('returns empty when cursor is after a closed reference', () => {
-    const { doc, textDoc, params } = setup('ax1 First\nth1 Given {ax1} more text\n', 1, 20);
+    const { doc, textDoc, params } = setup('stm ax1 = First\nstm th1 = Given ${ax1} more text\n', 1, 28);
     const result = onCompletion(params, doc, textDoc);
     expect(result).toHaveLength(0);
   });
 
-  it('returns completions when typing inside an open {', () => {
-    const { doc, textDoc, params } = setup('ax1 First\nth1 Given {a\n', 1, 12);
+  it('returns completions when typing inside an open ${', () => {
+    const { doc, textDoc, params } = setup('stm ax1 = First\nstm th1 = Given ${a\n', 1, 19);
     const result = onCompletion(params, doc, textDoc);
     expect(result.length).toBeGreaterThan(0);
   });
 
-  it('shows annotation in completion detail', () => {
-    const { doc, textDoc, params } = setup('ax1@asm An assumption\nth1 Given {\n', 1, 11);
+  it('shows Assumption label for asm type', () => {
+    const { doc, textDoc, params } = setup('asm ax1 = An assumption\nstm th1 = Given ${\n', 1, 18);
     const result = onCompletion(params, doc, textDoc);
     const ax1 = result.find((c) => c.label === 'ax1');
-    expect(ax1?.detail).toBe('[@asm] An assumption');
+    expect(ax1?.detail).toBe('[Assumption] An assumption');
   });
 
-  it('shows no annotation prefix when none present', () => {
-    const { doc, textDoc, params } = setup('ax1 Plain\nth1 Given {\n', 1, 11);
+  it('shows Risk label for rsk type', () => {
+    const { doc, textDoc, params } = setup('rsk r1 = Risky\nstm th1 = Given ${\n', 1, 18);
     const result = onCompletion(params, doc, textDoc);
-    const ax1 = result.find((c) => c.label === 'ax1');
-    expect(ax1?.detail).toBe('Plain');
+    const r1 = result.find((c) => c.label === 'r1');
+    expect(r1?.detail).toBe('[Risk] Risky');
+  });
+
+  it('shows Unknown label for unk type', () => {
+    const { doc, textDoc, params } = setup('unk q1 = Open question\nstm th1 = Given ${\n', 1, 18);
+    const result = onCompletion(params, doc, textDoc);
+    const q1 = result.find((c) => c.label === 'q1');
+    expect(q1?.detail).toBe('[Unknown] Open question');
   });
 });

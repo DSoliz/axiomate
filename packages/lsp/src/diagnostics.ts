@@ -18,13 +18,13 @@ export function computeDiagnostics(doc: ParsedDocument): Diagnostic[] {
     }
   }
 
-  // Invalid annotations
+  // Invalid type keywords
   for (const stmt of doc.statements) {
-    if (stmt.annotation && !VALID_ANNOTATIONS.includes(stmt.annotation)) {
+    if (!VALID_ANNOTATIONS.includes(stmt.annotation)) {
       diagnostics.push({
-        range: stmt.annotationRange!,
+        range: stmt.annotationRange,
         severity: DiagnosticSeverity.Error,
-        message: `Invalid annotation '@${stmt.annotation}'. Valid annotations: @unk, @rsk, @asm`,
+        message: `Invalid type '${stmt.annotation}'. Valid types: stm, unk, rsk, asm`,
         source: 'axiomate',
       });
     }
@@ -37,7 +37,7 @@ export function computeDiagnostics(doc: ParsedDocument): Diagnostic[] {
         diagnostics.push({
           range: ref.range,
           severity: DiagnosticSeverity.Error,
-          message: `Unresolved reference '{${ref.id}}'`,
+          message: `Unresolved reference '\${${ref.id}}'`,
           source: 'axiomate',
         });
       } else if (ref.id === stmt.id) {

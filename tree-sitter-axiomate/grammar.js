@@ -21,15 +21,15 @@ module.exports = grammar({
         /\n?/,
       ),
 
-    // Tokenize "id[@annotation] " as a single atomic token to avoid
+    // Tokenize "type id = " as a single atomic token to avoid
     // ambiguity with text during error recovery
     statement_head: ($) =>
-      token(prec(1, seq(/[a-zA-Z0-9][a-zA-Z0-9_-]*/, optional(seq("@", /[a-zA-Z]+/)), / /))),
+      token(prec(1, seq(/[a-zA-Z]+/, / /, /[a-zA-Z0-9][a-zA-Z0-9_-]*/, / = /))),
 
     body: ($) => repeat1(choice($.reference, $.text)),
 
-    reference: ($) => seq("{", token.immediate(/[a-zA-Z0-9_-]+/), token.immediate("}")),
+    reference: ($) => seq("$", token.immediate("{"), token.immediate(/[a-zA-Z0-9_-]+/), token.immediate("}")),
 
-    text: ($) => /[^\{\n]+/,
+    text: ($) => /[^\$\n]+/,
   },
 });

@@ -1,7 +1,8 @@
-import { Annotation, ParsedDocument, Reference, Statement, VALID_ANNOTATIONS } from './types';
+import { ParsedDocument, Reference, Statement } from './types';
 
-const ID_PATTERN = /^([a-zA-Z0-9_-]+)(?:@([a-zA-Z]+))?\s+(.*)/;
-const REF_PATTERN = /\{([a-zA-Z0-9_-]+)\}/g;
+// <type> <id> = <body>
+const STMT_PATTERN = /^([a-zA-Z]+)\s+([a-zA-Z0-9][a-zA-Z0-9_-]*)\s*=\s*(.*)/;
+const REF_PATTERN = /\$\{([a-zA-Z0-9_-]+)\}/g;
 
 export function parse(text: string): ParsedDocument {
   const lines = text.split('\n');
@@ -16,32 +17,24 @@ export function parse(text: string): ParsedDocument {
       continue;
     }
 
-    const match = line.match(ID_PATTERN);
+    const match = line.match(STMT_PATTERN);
     if (!match) {
       continue;
     }
 
-    const id = match[1];
-    const rawAnnotation = match[2] || null;
+    const annotation = match[1];
+    const id = match[2];
     const body = match[3];
-    const idStart = line.indexOf(id);
+
+    const annotationStart = line.indexOf(annotation);
+    const annotationEnd = annotationStart + annotation.length;
+
+    const idStart = line.indexOf(id, annotationEnd);
     const idEnd = idStart + id.length;
 
-    let annotation: Annotation | null = null;
-    let annotationRange: Statement['annotationRange'] = null;
-
-    if (rawAnnotation) {
-      const annotationStart = idEnd + 1; // skip the @
-      annotation = VALID_ANNOTATIONS.includes(rawAnnotation)
-        ? (rawAnnotation as Annotation)
-        : (rawAnnotation as Annotation); // store raw value; diagnostics will flag invalid ones
-      annotationRange = {
-        start: { line: i, character: idEnd },
-        end: { line: i, character: annotationStart + rawAnnotation.length },
-      };
-    }
-
-    const bodyStart = idEnd + (rawAnnotation ? 1 + rawAnnotation.length : 0) + 1;
+    // Find where the body starts (after "= ")
+    const eqIdx = line.indexOf('=', idEnd);
+    const bodyStart = eqIdx + 1 + (line[eqIdx + 1] === ' ' ? 1 : 0);
 
     const references: Reference[] = [];
     let refMatch: RegExpExecArray | null;
@@ -59,8 +52,8 @@ export function parse(text: string): ParsedDocument {
           end: { line: i, character: refStartInLine + refMatch[0].length },
         },
         idRange: {
-          start: { line: i, character: refStartInLine + 1 },
-          end: { line: i, character: refStartInLine + 1 + refId.length },
+          start: { line: i, character: refStartInLine + 2 }, // skip ${
+          end: { line: i, character: refStartInLine + 2 + refId.length },
         },
       });
     }
@@ -72,7 +65,10 @@ export function parse(text: string): ParsedDocument {
         end: { line: i, character: idEnd },
       },
       annotation,
-      annotationRange,
+      annotationRange: {
+        start: { line: i, character: annotationStart },
+        end: { line: i, character: annotationEnd },
+      },
       bodyRange: {
         start: { line: i, character: bodyStart },
         end: { line: i, character: bodyStart + body.length },

@@ -18,7 +18,7 @@ export function onCodeAction(params: CodeActionParams, doc: ParsedDocument): Cod
       edit: {
         changes: {
           [params.textDocument.uri]: [
-            TextEdit.insert(insertPosition, `${newId} \n`),
+            TextEdit.insert(insertPosition, `stm ${newId} = \n`),
           ],
         },
       },
